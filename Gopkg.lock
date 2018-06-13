@@ -2,7 +2,7 @@
 
 
 [[projects]]
-  name = "github.com/go-fsnotify/fsnotify"
+  name = "github.com/fsnotify/fsnotify"
   packages = ["."]
   revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
   version = "v1.4.7"
