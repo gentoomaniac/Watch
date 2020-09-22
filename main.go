@@ -85,9 +85,10 @@ func main() {
 	}
 
 	timer := time.NewTimer(0)
+	<-timer.C // Avoid to run command just after startup.
 	changes := startWatching(*watchPath)
-	lastRun := time.Time{}
-	lastChange := time.Now()
+	lastRun := time.Now()
+	lastChange := lastRun
 
 	for {
 		select {
