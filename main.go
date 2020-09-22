@@ -22,7 +22,7 @@ import (
 
 var (
 	debug     = flag.Bool("v", false, "Enable verbose debugging output")
-	term      = flag.Bool("t", true, "Run in a terminal (deprecated, always true)")
+	_         = flag.Bool("t", true, "Run in a terminal (deprecated, always true)")
 	exclude   = flag.String("x", "", "Exclude files and directories matching this regular expression")
 	watchPath = flag.String("p", ".", "The path to watch")
 )
@@ -164,13 +164,6 @@ func wait(start time.Time, cmd *exec.Cmd) int {
 				return status.ExitStatus()
 			}
 		}
-	}
-}
-
-func kill() {
-	select {
-	case killChan <- time.Now():
-		debugPrint("Killing")
 	}
 }
 
