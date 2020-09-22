@@ -209,7 +209,7 @@ func sendChanges(w *fsnotify.Watcher, changes chan<- time.Time) {
 			}
 			time, err := modTime(ev.Name)
 			if err != nil {
-				log.Printf("Failed to get even time: %s", err)
+				log.Printf("Failed to get event time: %s", err)
 				continue
 			}
 
