@@ -92,15 +92,15 @@ func main() {
 	for {
 		select {
 		case lastChange = <-changes:
-			timer.Reset(rebuildDelay)
+			if lastRun.Before(lastChange) {
+				timer.Reset(rebuildDelay)
+			}
 
 		case <-ui.rerun():
 			lastRun = run(ui)
 
 		case <-timer.C:
-			if lastRun.Before(lastChange) {
-				lastRun = run(ui)
-			}
+			lastRun = run(ui)
 		}
 	}
 }
