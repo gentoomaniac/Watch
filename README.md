@@ -3,8 +3,9 @@ Watch
 
 Usage: ``Watch [-v] [-t]  [-p <path>] [-x <regexp>] <command>``
 
-Watches for changes in a directory tree, and runs a command when
-something changed.
+Watches for changes in a directory tree, and runs a command when something
+changed. Note that only changes that happen while Watch is running are
+detected. Also, a failed execution of the command is not retried.
 
 -t deprecated, always true.
 
