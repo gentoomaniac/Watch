@@ -4,7 +4,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -39,18 +38,6 @@ var (
 	killChan   = make(chan time.Time, 1)
 )
 
-type ui interface {
-	redisplay(func(io.Writer))
-	// An empty struct is sent when the command should be rerun.
-	rerun() <-chan struct{}
-}
-
-type writerUI struct{ io.Writer }
-
-func (w writerUI) redisplay(f func(io.Writer)) { f(w) }
-
-func (w writerUI) rerun() <-chan struct{} { return nil }
-
 func main() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s: [flags] command [command args…]\n", os.Args[0])
@@ -74,8 +61,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	ui := ui(writerUI{os.Stdout})
-
 	if *exclude != "" {
 		var err error
 		excludeRe, err = regexp.Compile(*exclude)
@@ -97,36 +82,29 @@ func main() {
 				timer.Reset(rebuildDelay)
 			}
 
-		case <-ui.rerun():
-			lastRun = run(ui)
-
 		case <-timer.C:
-			lastRun = run(ui)
+			lastRun = run()
 		}
 	}
 }
 
-func run(ui ui) time.Time {
-	ui.redisplay(func(out io.Writer) {
-		cmd := exec.Command(flag.Arg(0), flag.Args()[1:]...)
-		cmd.Stdout = out
-		cmd.Stderr = out
-		if hasSetPGID {
-			var attr syscall.SysProcAttr
-			reflect.ValueOf(&attr).Elem().FieldByName(setpgidName).SetBool(true)
-			cmd.SysProcAttr = &attr
-		}
-		io.WriteString(out, strings.Join(flag.Args(), " ")+"\n")
-		start := time.Now()
-		if err := cmd.Start(); err != nil {
-			io.WriteString(out, "fatal: "+err.Error()+"\n")
-			return
-		}
-		if s := wait(start, cmd); s != 0 {
-			io.WriteString(out, "exit status "+strconv.Itoa(s)+"\n")
-		}
-		io.WriteString(out, time.Now().String()+"\n")
-	})
+func run() time.Time {
+	cmd := exec.Command(flag.Arg(0), flag.Args()[1:]...)
+	if hasSetPGID {
+		var attr syscall.SysProcAttr
+		reflect.ValueOf(&attr).Elem().FieldByName(setpgidName).SetBool(true)
+		cmd.SysProcAttr = &attr
+	}
+	fmt.Print(strings.Join(flag.Args(), " ") + "\n")
+	start := time.Now()
+	if err := cmd.Start(); err != nil {
+		fmt.Print("fatal: " + err.Error() + "\n")
+		return time.Now()
+	}
+	if s := wait(start, cmd); s != 0 {
+		fmt.Print("exit status " + strconv.Itoa(s) + "\n")
+	}
+	fmt.Println(time.Now())
 
 	return time.Now()
 }
