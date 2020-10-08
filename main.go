@@ -90,6 +90,9 @@ func main() {
 
 func run() time.Time {
 	cmd := exec.Command(flag.Arg(0), flag.Args()[1:]...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stdout
+
 	if hasSetPGID {
 		var attr syscall.SysProcAttr
 		reflect.ValueOf(&attr).Elem().FieldByName(setpgidName).SetBool(true)
