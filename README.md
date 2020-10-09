@@ -3,10 +3,11 @@ Watch
 
 Usage: ``Watch [-v] [-t]  [-p <path>] [-x <regexp>] <command>``
 
-Watches for changes in a directory tree, and runs a command when
-something changed. By default, the output goes to an acme win.
+Watches for changes in a directory tree, and runs a command when something
+changed. Note that only changes that happen while Watch is running are
+detected. Also, a failed execution of the command is not retried.
 
--t sends the output to the terminal instead of acme
+-t deprecated, always true.
 
 -v enables verbose debugging output
 
