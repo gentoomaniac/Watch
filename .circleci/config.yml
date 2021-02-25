@@ -24,8 +24,8 @@ jobs:
       - deploy:
           name: push image
           command: |
-            docker login -u "$DOCKER_REGISTRY_USER" -p "$DOCKER_REGISTRY_PASSWORD" docker.io
             if [ -z "${CIRCLE_TAG}" -a "${CIRCLE_BRANCH}" == "master" ]; then
+              docker login -u "$DOCKER_REGISTRY_USER" -p "$DOCKER_REGISTRY_PASSWORD" docker.io
               docker push "docker.io/weaveworks/watch:$(./image-tag)"
               docker push "docker.io/weaveworks/watch"
             fi
