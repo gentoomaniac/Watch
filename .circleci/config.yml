@@ -27,12 +27,12 @@ jobs:
           docker context create buildcontext
           docker buildx create buildcontext --use
       - run: |
-          docker buildx build --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag "docker.io/weaveworks/watch:$(./image-tag)" .
+          docker buildx build --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag docker.io/weaveworks/watch:$(./image-tag) .
       - deploy:
           name: push image
           command: |
             if [ -z "${CIRCLE_TAG}" -a "${CIRCLE_BRANCH}" == "master" ]; then
               docker login -u "$DOCKER_REGISTRY_USER" -p "$DOCKER_REGISTRY_PASSWORD" docker.io
-              docker buildx build --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --push --tag "docker.io/weaveworks/watch:$(./image-tag)" .
-              docker buildx build --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --push --tag "docker.io/weaveworks/watch" .
+              docker buildx build --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --push --tag docker.io/weaveworks/watch:$(./image-tag) .
+              docker buildx build --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --push --tag docker.io/weaveworks/watch .
             fi
