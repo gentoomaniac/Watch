@@ -1,39 +1,38 @@
-version: 2
+version: 2.1
 
-defaults: &defaults
-  working_directory: /go/src/github.com/weaveworks/Watch
-  docker:
-    - image: circleci/golang:latest
+workflows:
+  build_deploy:
+    jobs:
+      - tests
+      - build
 
 jobs:
   tests:
-    <<: *defaults
+    working_directory: /go/src/github.com/weaveworks/Watch
+    docker:
+      - image: circleci/golang:latest
     steps:
       - checkout
       - run: go get -u golang.org/x/lint/golint
       - run: ./gok.sh
 
-
   build:
-    <<: *defaults
+    docker:
+      - image: cimg/base:stable
     steps:
+      - setup_remote_docker:
+          version: 20.10.7
       - checkout
-      - setup_remote_docker
-      - run: go build
-      - run: docker build -t docker.io/weaveworks/watch -t docker.io/weaveworks/watch:$(./image-tag) .
+      - run: |
+          docker context create buildcontext
+          docker buildx create buildcontext --use
+      - run: |
+          docker buildx build --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag docker.io/weaveworks/watch:$(./image-tag) .
       - deploy:
           name: push image
           command: |
             if [ -z "${CIRCLE_TAG}" -a "${CIRCLE_BRANCH}" == "master" ]; then
               docker login -u "$DOCKER_REGISTRY_USER" -p "$DOCKER_REGISTRY_PASSWORD" docker.io
-              docker push "docker.io/weaveworks/watch:$(./image-tag)"
-              docker push "docker.io/weaveworks/watch"
+              docker buildx build --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --push --tag docker.io/weaveworks/watch:$(./image-tag) .
+              docker buildx build --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --push --tag docker.io/weaveworks/watch .
             fi
-
-
-workflows:
-  version: 2
-  build_deploy:
-    jobs:
-      - tests
-      - build
