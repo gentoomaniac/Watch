@@ -9,6 +9,7 @@ COPY . /app
 RUN go build -v -o /build /app
 
 FROM alpine:3.15
+RUN apk add --no-cache curl
 RUN mkdir /build
 COPY --from=builder /build .
 
