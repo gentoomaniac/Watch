@@ -73,7 +73,7 @@ func main() {
 	<-timer.C // Avoid to run command just after startup.
 	changes := startWatching(*watchPath)
 	lastRun := time.Now()
-	lastChange := lastRun
+	var lastChange time.Time
 
 	for {
 		select {
@@ -128,20 +128,26 @@ func wait(start time.Time, cmd *exec.Cmd) int {
 			}
 			if n == 0 {
 				debugPrint("Sending SIGTERM")
-				syscall.Kill(p, syscall.SIGTERM)
+				if err := syscall.Kill(p, syscall.SIGTERM); err != nil {
+					log.Print(err)
+				}
 			} else {
 				debugPrint("Sending SIGKILL")
-				syscall.Kill(p, syscall.SIGKILL)
+				if err := syscall.Kill(p, syscall.SIGKILL); err != nil {
+					log.Print(err)
+				}
 			}
 			n++
 
 		case <-ticker.C:
 			var status syscall.WaitStatus
 			p := cmd.Process.Pid
-			switch q, err := syscall.Wait4(p, &status, syscall.WNOHANG, nil); {
-			case err != nil:
+			// Deprecated: this package is locked down. Callers should use the corresponding package in the golang.org/x/sys repository instead.
+			q, err := syscall.Wait4(p, &status, syscall.WNOHANG, nil)
+			if err != nil {
 				panic(err)
-			case q > 0:
+			}
+			if q > 0 {
 				cmd.Wait() // Clean up any goroutines created by cmd.Start.
 				return status.ExitStatus()
 			}
