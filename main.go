@@ -13,8 +13,9 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
+
+	syscall "golang.org/x/sys/unix"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -142,7 +143,6 @@ func wait(start time.Time, cmd *exec.Cmd) int {
 		case <-ticker.C:
 			var status syscall.WaitStatus
 			p := cmd.Process.Pid
-			// Deprecated: this package is locked down. Callers should use the corresponding package in the golang.org/x/sys repository instead.
 			q, err := syscall.Wait4(p, &status, syscall.WNOHANG, nil)
 			if err != nil {
 				panic(err)
