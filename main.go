@@ -148,7 +148,10 @@ func wait(start time.Time, cmd *exec.Cmd) int {
 				panic(err)
 			}
 			if q > 0 {
-				cmd.Wait() // Clean up any goroutines created by cmd.Start.
+				if err := cmd.Wait(); err != nil {
+					log.Print(err)
+				} // Clean up any goroutines created by cmd.Start.
+
 				return status.ExitStatus()
 			}
 		}
