@@ -32,7 +32,7 @@ dockers:
   goos: linux
   goarch: amd64
   image_templates:
-  - "ghcr.io/gentoomaniac/Watch:{{ .ShortCommit }}"
+  - "ghcr.io/gentoomaniac/watch:{{ .ShortCommit }}"
   build_flag_templates:
   - "--pull"
   - "--platform=linux/amd64"
