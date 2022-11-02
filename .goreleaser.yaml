@@ -1,0 +1,38 @@
+before:
+  hooks:
+    - go mod download
+builds:
+  - main: ./main.go
+    id: "Watch"
+    binary: "Watch"
+    ldflags:
+      - -s -w
+      - -X main.commit={{.ShortCommit}}
+      - -X main.date={{.Date}}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+
+snapshot:
+  name_template: "{{.ShortCommit}}"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^Merge pull request'
+
+dockers:
+- id: Watch
+  use: docker
+  dockerfile: goreleaser.Dockerfile
+  goos: linux
+  goarch: amd64
+  image_templates:
+  - "ghcr.io/gentoomaniac/Watch:{{ .ShortCommit }}"
+  build_flag_templates:
+  - "--pull"
+  - "--platform=linux/amd64"
